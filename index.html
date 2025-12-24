@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>恋爱体质测试 - 测测你是什么恋爱鬼才</title>
+    <title>恋爱体质测试 - 测测你是什么恋爱段位？</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -20,54 +21,63 @@
         }
 
         /* 背景装饰 */
-        body::before {
-            content: '💕';
+        .bg-decoration {
             position: fixed;
-            font-size: 100px;
-            opacity: 0.1;
-            top: 10%;
-            left: 10%;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0.2;
             animation: float 6s ease-in-out infinite;
         }
 
-        body::after {
-            content: '💖';
-            position: fixed;
-            font-size: 80px;
-            opacity: 0.1;
-            bottom: 10%;
-            right: 10%;
-            animation: float 8s ease-in-out infinite reverse;
-        }
-
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
         }
 
+        /* 容器 */
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             position: relative;
             z-index: 1;
         }
 
+        /* 页面通用样式 */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* 首页样式 */
         .home-page {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
             text-align: center;
-            color: white;
+            padding: 40px 20px;
         }
 
         .logo {
-            font-size: 80px;
+            font-size: 60px;
             margin-bottom: 20px;
-            animation: bounce 1s ease-in-out infinite;
+            animation: bounce 1s ease infinite;
         }
 
         @keyframes bounce {
@@ -75,10 +85,12 @@
             50% { transform: translateY(-10px); }
         }
 
-        h1 {
-            font-size: 2.5em;
+        .title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
             margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             background: linear-gradient(45deg, #fff, #ffd700);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -86,44 +98,61 @@
         }
 
         .subtitle {
-            font-size: 1.2em;
+            font-size: 18px;
+            color: #fff;
             margin-bottom: 30px;
-            opacity: 0.9;
+            opacity: 0.95;
         }
 
-        .description {
+        .feature-list {
             background: rgba(255,255,255,0.95);
-            padding: 30px;
             border-radius: 20px;
-            margin-bottom: 30px;
-            color: #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+            margin: 30px auto;
             max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
-        .description p {
-            margin-bottom: 15px;
-            line-height: 1.8;
+        .feature-list h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .feature-list ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .feature-list li:before {
+            content: "💖 ";
+            margin-right: 10px;
         }
 
         .start-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
             color: white;
             border: none;
             padding: 20px 60px;
-            font-size: 1.3em;
+            font-size: 24px;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(255,107,107,0.4);
             transition: all 0.3s ease;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            margin-top: 20px;
         }
 
         .start-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255,107,107,0.6);
         }
 
         .start-btn:active {
@@ -132,30 +161,11 @@
 
         /* 测试页面样式 */
         .test-page {
-            display: none;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .test-card {
             background: rgba(255,255,255,0.98);
             border-radius: 25px;
             padding: 40px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            max-width: 700px;
-            margin: 50px auto;
-            animation: slideIn 0.5s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-top: 20px;
         }
 
         .progress-bar {
@@ -177,22 +187,23 @@
         .progress-text {
             text-align: center;
             color: #666;
+            font-size: 14px;
             margin-bottom: 10px;
-            font-weight: bold;
         }
 
         .question-number {
+            font-size: 18px;
             color: #667eea;
-            font-size: 0.9em;
-            margin-bottom: 15px;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
 
         .question-text {
-            font-size: 1.5em;
+            font-size: 24px;
             color: #333;
             margin-bottom: 30px;
             line-height: 1.6;
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .options {
@@ -202,53 +213,44 @@
         }
 
         .option {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
+            background: #f8f9fa;
+            border: 3px solid #e0e0e0;
             border-radius: 15px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 3px solid transparent;
+            font-size: 16px;
+            color: #333;
             position: relative;
             overflow: hidden;
         }
 
-        .option::before {
-            content: '';
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+
+        .option:before {
+            content: "";
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             transition: left 0.5s ease;
         }
 
-        .option:hover::before {
+        .option:hover:before {
             left: 100%;
-        }
-
-        .option:hover {
-            transform: translateX(5px);
-            border-color: #667eea;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .option.selected {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: #764ba2;
-            transform: scale(1.02);
-        }
-
-        .option-text {
-            font-size: 1.1em;
-            line-height: 1.5;
-        }
-
-        .option-score {
-            font-size: 0.8em;
-            opacity: 0.7;
-            margin-top: 5px;
         }
 
         .navigation {
@@ -262,8 +264,8 @@
             flex: 1;
             padding: 15px 30px;
             border: none;
-            border-radius: 50px;
-            font-size: 1.1em;
+            border-radius: 12px;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
@@ -276,17 +278,16 @@
 
         .prev-btn:hover:not(:disabled) {
             background: #d0d0d0;
-            transform: translateX(-3px);
         }
 
         .next-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
 
         .next-btn:hover:not(:disabled) {
-            transform: translateX(3px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
         }
 
         .nav-btn:disabled {
@@ -296,605 +297,709 @@
 
         /* 结果页面样式 */
         .result-page {
-            display: none;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .result-card {
             background: rgba(255,255,255,0.98);
             border-radius: 25px;
-            padding: 50px 40px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            max-width: 800px;
-            margin: 30px auto;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+
+        .result-header {
             text-align: center;
-            animation: scaleIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin-bottom: 40px;
+        }
+
+        .result-emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: scaleIn 0.6s ease;
         }
 
         @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .result-icon {
-            font-size: 100px;
-            margin-bottom: 20px;
-            animation: rotate 2s ease-in-out infinite;
-        }
-
-        @keyframes rotate {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-10deg); }
-            75% { transform: rotate(10deg); }
+            from { transform: scale(0); }
+            to { transform: scale(1); }
         }
 
         .result-title {
-            font-size: 2.5em;
-            color: #667eea;
-            margin-bottom: 20px;
+            font-size: 36px;
             font-weight: bold;
-        }
-
-        .score-display {
-            font-size: 4em;
-            font-weight: bold;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            font-size: 72px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            animation: countUp 1s ease;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .result-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            height: 300px;
+        }
+
+        .analysis-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 15px;
+        }
+
+        .analysis-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analysis-section p {
+            color: #333;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             margin: 20px 0;
         }
 
-        .result-description {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            padding: 30px;
+        .tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
             border-radius: 20px;
-            margin: 30px 0;
-            text-align: left;
-            line-height: 1.8;
-            color: #333;
-        }
-
-        .result-description h3 {
-            color: #d63031;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .result-description p {
-            margin-bottom: 10px;
-        }
-
-        .traits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 30px 0;
-        }
-
-        .trait-item {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            padding: 15px;
-            border-radius: 15px;
+            font-size: 14px;
             font-weight: bold;
-            color: #333;
         }
 
         .action-buttons {
             display: flex;
             gap: 15px;
-            justify-content: center;
             margin-top: 30px;
-            flex-wrap: wrap;
         }
 
         .action-btn {
-            padding: 15px 40px;
+            flex: 1;
+            padding: 18px;
             border: none;
-            border-radius: 50px;
-            font-size: 1.1em;
+            border-radius: 12px;
+            font-size: 18px;
             cursor: pointer;
-            transition: all 0.3s ease;
             font-weight: bold;
+            transition: all 0.3s ease;
         }
 
         .share-btn {
-            background: linear-gradient(45deg, #11998e, #38ef7d);
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
         }
 
         .retry-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
             color: white;
         }
 
         .action-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
         /* 页脚 */
-        footer {
+        .footer {
             text-align: center;
-            padding: 30px;
+            padding: 30px 20px;
             color: white;
-            font-size: 0.9em;
-            opacity: 0.8;
+            font-size: 14px;
+            opacity: 0.9;
         }
 
-        footer p {
+        .footer p {
             margin: 5px 0;
         }
 
         /* 响应式设计 */
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
+            .title {
+                font-size: 32px;
             }
 
-            .logo {
-                font-size: 60px;
-            }
-
-            .test-card, .result-card {
-                padding: 25px;
+            .test-page, .result-page {
+                padding: 25px 20px;
             }
 
             .question-text {
-                font-size: 1.2em;
+                font-size: 20px;
+            }
+
+            .option {
+                padding: 15px;
+                font-size: 14px;
             }
 
             .score-display {
-                font-size: 3em;
+                font-size: 56px;
             }
 
             .result-title {
-                font-size: 2em;
+                font-size: 28px;
             }
 
             .action-buttons {
                 flex-direction: column;
             }
-
-            .action-btn {
-                width: 100%;
-            }
         }
 
         /* 加载动画 */
         .loading {
-            display: none;
             text-align: center;
-            color: white;
-            font-size: 1.5em;
-            margin-top: 50px;
+            padding: 40px;
         }
 
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
 
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* 分享提示 */
-        .share-tip {
+        /* 提示信息 */
+        .toast {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 20px 40px;
-            border-radius: 15px;
-            display: none;
+            padding: 15px 25px;
+            border-radius: 10px;
             z-index: 1000;
-            animation: fadeInOut 2s ease;
+            animation: slideIn 0.3s ease;
         }
 
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; }
-            10%, 90% { opacity: 1; }
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
         }
     </style>
 </head>
 <body>
-    <!-- 首页 -->
-    <div class="home-page" id="homePage">
-        <div class="logo">💘</div>
-        <h1>恋爱体质测试</h1>
-        <p class="subtitle">测测你是什么恋爱鬼才</p>
-        
-        <div class="description">
-            <p>🌟 <strong>25道灵魂拷问</strong>，直击你的恋爱DNA！</p>
-            <p>😂 融入全网最火梗和神评论，笑着测完不尴尬</p>
-            <p>📊 专业评分机制 + 搞笑解读，让你笑出腹肌</p>
-            <p>🎯 100分满分测试，看看你的恋爱段位有多高！</p>
-            <p style="margin-top: 20px; color: #666; font-size: 0.9em;">
-                💡 提示：请诚实作答，系统不会笑话你（真的）
-            </p>
-        </div>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration" id="bgDecoration"></div>
 
-        <button class="start-btn" onclick="startTest()">
-            🚀 开始测试
-        </button>
-    </div>
+    <div class="container">
+        <!-- 首页 -->
+        <div class="page active" id="homePage">
+            <div class="home-page">
+                <div class="logo">💘</div>
+                <h1 class="title">恋爱体质测试</h1>
+                <p class="subtitle">测测你是什么恋爱段位？25道题让你现原形！</p>
+                
+                <div class="feature-list">
+                    <h3>✨ 为什么要测？</h3>
+                    <ul>
+                        <li>专业心理测评 + 网络神评论 = 超准！</li>
+                        <li>25道精心设计的题目，涵盖恋爱全维度</li>
+                        <li>恋爱人格、依恋类型、占有欲全解析</li>
+                        <li>幽默风趣不失专业，笑着笑着就懂了自己</li>
+                        <li>生成专属恋爱体质报告，朋友圈装X神器</li>
+                    </ul>
+                </div>
 
-    <!-- 测试页面 -->
-    <div class="test-page" id="testPage">
-        <div class="test-card">
-            <div class="progress-text">
-                <span class="question-number" id="questionNumber">第 1 / 25 题</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: 4%"></div>
-            </div>
+                <p style="color: white; font-size: 16px; margin: 20px 0;">
+                    💡 提示：请根据第一反应选择，不要过度思考哦~
+                </p>
 
-            <div class="question-text" id="questionText"></div>
-            
-            <div class="options" id="optionsContainer"></div>
-
-            <div class="navigation">
-                <button class="nav-btn prev-btn" id="prevBtn" onclick="prevQuestion()" disabled>
-                    +一题
-                </button>
-                <button class="nav-btn next-btn" id="nextBtn" onclick="nextQuestion()" disabled>
-                    下一题 ➡
+                <button class="start-btn" onclick="startTest()">
+                    🚀 开始测试
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- 结果页面 -->
-    <div class="result-page" id="resultPage">
-        <div class="result-card">
-            <div class="result-icon" id="resultIcon">💖</div>
-            <h2 class="result-title" id="resultTitle">恋爱萌新</h2>
-            <div class="score-display" id="scoreDisplay">0/100</div>
-            
-            <div class="result-description" id="resultDescription"></div>
+        <!-- 测试页面 -->
+        <div class="page" id="testPage">
+            <div class="test-page">
+                <div class="progress-text">
+                    <span id="currentQuestion">1</span> / 25 题
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 4%"></div>
+                </div>
 
-            <div class="traits-grid" id="traitsGrid"></div>
+                <div class="question-number" id="questionNumber">第 1 题</div>
+                <div class="question-text" id="questionText"></div>
+                
+                <div class="options" id="optionsContainer"></div>
 
-            <div class="action-buttons">
-                <button class="action-btn share-btn" onclick="shareResult()">
-                    📤 分享结果
-                </button>
-                <button class="action-btn retry-btn" onclick="retryTest()">
-                    🔄 再测一次
-                </button>
+                <div class="navigation">
+                    <button class="nav-btn prev-btn" id="prevBtn" onclick="prevQuestion()" disabled>
+                        + 上一题
+                    </button>
+                    <button class="nav-btn next-btn" id="nextBtn" onclick="nextQuestion()" disabled>
+                        下一题 ➡️
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- 结果页面 -->
+        <div class="page" id="resultPage">
+            <div class="result-page">
+                <div class="result-header">
+                    <div class="result-emoji" id="resultEmoji">🎯</div>
+                    <h2 class="result-title" id="resultTitle">计算中...</h2>
+                    <div class="score-display" id="scoreDisplay">0</div>
+                    <p class="result-subtitle" id="resultSubtitle">分析中...</p>
+                </div>
+
+                <div class="tags" id="resultTags"></div>
+
+                <div class="chart-container" id="radarChart"></div>
+
+                <div class="analysis-section">
+                    <h3>🎭 恋爱人格特质</h3>
+                    <p id="personalityAnalysis"></p>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>🔗 恋爱依恋类型</h3>
+                    <p id="attachmentAnalysis"></p>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>🔥 恋爱占有欲指数</h3>
+                    <p id="possessivenessAnalysis"></p>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>💡 专业建议</h3>
+                    <p id="professionalAdvice"></p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn share-btn" onclick="shareResult()">
+                        📤 分享结果
+                    </button>
+                    <button class="action-btn retry-btn" onclick="retryTest()">
+                    🔄 重新测试
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>⚠️ 本测试仅供娱乐参考，不构成专业心理咨询建议</p>
+            <p>© 2024 恋爱体质测试 | 让爱情更有趣</p>
+        </div>
     </div>
-
-    <!-- 页脚 -->
-    <footer>
-        <p>⚠️ 本测试仅供娱乐，如有雷同，纯属巧合</p>
-        <p>💕 恋爱有风险，投入需谨慎 | 测试不背锅哦~</p>
-        <p>© 2024 恋爱体质测试 | 让爱更有趣</p>
-    </footer>
-
-    <!-- 分享提示 -->
-    <div class="share-tip" id="shareTip">已复制到剪贴板！快去分享吧~</div>
 
     <script>
-        // ==================== 题库数据 ====================
+        // ==================== 数据定义 ====================
+        
+        // 测试题目库（25题）
         const questions = [
             {
                 question: "看到喜欢的人发朋友圈，你的第一反应是？",
                 options: [
-                    { text: "秒赞并评论彩虹屁🌈", score: 10, desc: "热情似火型" },
-                    { text: "反复斟酌后点赞", score: 7, desc: "谨慎观察型" },
-                    { text: "假装没看见，实际偷看十遍", score: 5, desc: "闷骚暗恋型" },
-                    { text: "直接私聊：在吗？", score: 8, desc: "直球进攻型" }
+                    { text: "秒赞！还要评论'好帅/好美'", score: 10, tag: "热情" },
+                    { text: "偷偷看，绝不点赞（视奸大师）", score: 5, tag: "内敛" },
+                    { text: "等3分钟再赞，显得不那么急", score: 7, tag: "策略" },
+                    { text: "直接私聊：'朋友圈那张照片不错'", score: 8, tag: "直接" }
                 ]
             },
             {
-                question: "对方说「我去洗澡了」，你会怎么想？",
+                question: "对方3小时没回消息，你会？",
                 options: [
-                    { text: "真的去洗澡了啊", score: 3, desc: "单纯如白纸" },
-                    { text: "是不是不想理我了？", score: 6, desc: "患得患失型" },
-                    { text: "趁机去打两把游戏", score: 4, desc: "游戏人生型" },
-                    { text: "我也去洗，制造偶遇机会", score: 9, desc: "心机boy/girl" }
+                    { text: "疯狂轰炸：'人呢？''在吗？''？？？'", score: 10, tag: "焦虑" },
+                    { text: "假装不在意，其实每5分钟看一次手机", score: 8, tag: "口是心非" },
+                    { text: "该干嘛干嘛，回了再看", score: 3, tag: "独立" },
+                    { text: "直接打电话，不接就一直打", score: 9, tag: "执着" }
                 ]
             },
             {
-                question: "约会时对方迟到30分钟，你会？",
+                question: "第一次约会，你会选择？",
                 options: [
-                    { text: "暴走并拉黑", score: 2, desc: "暴躁老铁" },
-                    { text: "表面淡定，内心MMP", score: 5, desc: "隐忍大师" },
-                    { text: "趁机刷手机，反正不亏", score: 6, desc: "佛系青年" },
-                    { text: "担心对方出事，疯狂打电话", score: 10, desc: "暖心小天使" }
+                    { text: "高档餐厅，必须有排面", score: 8, tag: "仪式感" },
+                    { text: "奶茶店随便坐坐，聊得来就行", score: 4, tag: "随意" },
+                    { text: "游乐园/密室逃脱，制造肢体接触机会", score: 9, tag: "套路" },
+                    { text: "在家点外卖看电影，省钱又私密", score: 6, tag: "务实" }
                 ]
             },
             {
-                question: "发现对方和异性聊天，你的内心戏是？",
+                question: "发现对方和异性聊天，你会？",
                 options: [
-                    { text: "完了，我被绿了！", score: 3, desc: "戏精学院毕业" },
-                    { text: "正常社交，不慌", score: 8, desc: "理智成熟型" },
-                    { text: "偷偷视奸对方所有社交账号", score: 5, desc: "侦探柯南附体" },
-                    { text: "直接问：那是谁？", score: 7, desc: "坦诚沟通型" }
+                    { text: "直接问：'这谁啊？你们什么关系？'", score: 9, tag: "吃醋" },
+                    { text: "偷偷看聊天记录（如果能看到的话）", score: 7, tag: "窥探" },
+                    { text: "表面淡定，内心已经演完一部80集狗血剧", score: 8, tag: "戏精" },
+                    { text: "关我屁事，每个人都有私人空间", score: 2, tag: "佛系" }
                 ]
             },
             {
-                question: "你会因为什么瞬间对一个人心动？",
+                question: "你理想的恋爱节奏是？",
                 options: [
-                    { text: "Ta帮我系鞋带的时候", score: 10, desc: "细节控" },
-                    { text: "Ta笑起来很好看", score: 8, desc: "颜狗本狗" },
-                    { text: "Ta请我吃好吃的", score: 6, desc: "吃货本质" },
-                    { text: "Ta打游戏带飞我", score: 7, desc: "慕强心理" }
-                ]
-            },
-            {
-                question: "恋爱中你最不能接受的是？",
-                options: [
-                    { text: "冷暴力", score: 10, desc: "需要安全感" },
-                    { text: "欺骗", score: 10, desc: "原则性强" },
-                    { text: "不回消息", score: 7, desc: "粘人精" },
-                    { text: "不给我买奶茶", score: 3, desc: "奶茶续命党" }
-                ]
-            },
-            {
-                question: "你的表白方式通常是？",
-                options: [
-                    { text: "精心策划浪漫惊喜", score: 10, desc: "仪式感满分" },
-                    { text: "喝醉后借酒壮胆", score: 5, desc: "酒后吐真言" },
-                    { text: "直接说：我喜欢你", score: 8, desc: "简单粗暴" },
-                    { text: "暗示到对方都急了", score: 4, desc: "含蓄派" }
-                ]
-            },
-            {
-                question: "恋爱后你的朋友圈画风是？",
-                options: [
-                    { text: "全是对方照片", score: 9, desc: "秀恩爱狂魔" },
-                    { text: "偶尔发一下", score: 6, desc: "适度分享" },
-                    { text: "从不发，低调恋爱", score: 5, desc: "神秘主义者" },
-                    { text: "发了又秒删", score: 3, desc: "纠结症患者" }
+                    { text: "认识3天就在一起，闪恋才刺激", score: 10, tag: "冲动" },
+                    { text: "先做朋友半年，了解透彻再说", score: 3, tag: "谨慎" },
+                    { text: "暧昧3个月，水到渠成在一起", score: 6, tag: "稳健" },
+                    { text: "只要感觉对了，认识1小时也行", score: 9, tag: "感觉至上" }
                 ]
             },
             {
                 question: "对方送你礼物，但很丑，你会？",
                 options: [
-                    { text: "真诚感谢并珍藏", score: 10, desc: "高情商代表" },
-                    { text: "委婉说不太适合", score: 7, desc: "委婉派" },
-                    { text: "表面夸爆，背后闲置", score: 4, desc: "社交达人" },
-                    { text: "直接说丑，让他重买", score: 2, desc: "直男/直女" }
+                    { text: "强颜欢笑：'哇！好特别！我好喜欢！'", score: 7, tag: "体贴" },
+                    { text: "直接说：'这也太丑了吧哈哈'", score: 5, tag: "直率" },
+                    { text: "收下但从来不用/戴", score: 4, tag: "委婉" },
+                    { text: "感动哭了，毕竟是心意", score: 8, tag: "感性" }
                 ]
             },
             {
-                question: "你理想的约会频率是？",
+                question: "恋爱中你最不能接受的是？",
                 options: [
-                    { text: "每天都要见", score: 8, desc: "粘人小妖精" },
-                    { text: "一周2-3次", score: 7, desc: "平衡大师" },
-                    { text: "半个月一次", score: 4, desc: "独立型" },
-                    { text: "网恋就好，不见面", score: 2, desc: "云端恋爱" }
+                    { text: "冷暴力/不回消息", score: 10, tag: "敏感" },
+                    { text: "对方有很多异性朋友", score: 8, tag: "占有" },
+                    { text: "被管太严，没有自由", score: 7, tag: "自由" },
+                    { text: "对方不够浪漫/不懂惊喜", score: 6, tag: "浪漫" }
                 ]
             },
             {
-                question: "吵架后你通常？",
+                question: "吵架后，你通常？",
                 options: [
-                    { text: "主动求和", score: 9, desc: "大度包容" },
-                    { text: "等对方先低头", score: 5, desc: "傲娇属性" },
-                    { text: "讲道理分析对错", score: 7, desc: "理性派" },
-                    { text: "冷战到底", score: 3, desc: "倔强王者" }
+                    { text: "必须当天和好，睡不着觉", score: 9, tag: "急性子" },
+                    { text: "冷战到底，等对方先低头", score: 7, tag: "傲娇" },
+                    { text: "主动求和，毕竟和好最重要", score: 8, tag: "包容" },
+                    { text: "冷静几天，想清楚再沟通", score: 5, tag: "理性" }
                 ]
             },
             {
                 question: "你会查对方手机吗？",
                 options: [
-                    { text: "绝对不查，信任第一", score: 8, desc: "信任达人" },
-                    { text: "偶尔偷偷看", score: 5, desc: "好奇心重" },
-                    { text: "光明正大地看", score: 6, desc: "坦诚派" },
-                    { text: "不但查，还装定位软件", score: 2, desc: "控制欲强" }
+                    { text: "经常查，不给看就是有鬼", score: 10, tag: "控制" },
+                    { text: "偶尔偷偷看一眼", score: 6, tag: "好奇" },
+                    { text: "从来不查，信任最重要", score: 2, tag: "信任" },
+                    { text: "想查但不敢，怕被发现", score: 5, tag: "纠结" }
                 ]
             },
             {
-                question: "对方说「你变了」，你的反应是？",
+                question: "对方说'今晚要加班'，你会想？",
                 options: [
-                    { text: "反思自己哪里做错了", score: 9, desc: "自省型" },
-                    { text: "我哪变了？你才变了！", score: 4, desc: "防御型" },
-                    { text: "确实，人都会成长嘛", score: 8, desc: "成熟型" },
-                    { text: "是不是不爱我了？", score: 3, desc: "敏感型" }
-                ]
-            },
-            {
-                question: "你最擅长的恋爱技能是？",
-                options: [
-                    { text: "撒娇卖萌", score: 8, desc: "可爱担当" },
-                    { text: "做饭投喂", score: 10, desc: "贤妻/良母型" },
-                    { text: "倾听安慰", score: 9, desc: "情感导师" },
-                    { text: "打游戏带飞", score: 7, desc: "技术流" }
-                ]
-            },
-            {
-                question: "如果对方忘记你生日，你会？",
-                options: [
-                    { text: "直接提醒：今天我生日哦", score: 7, desc: "直率型" },
-                    { text: "生闷气等对方自己发现", score: 4, desc: "被动型" },
-                    { text: "假装不在意，其实超在意", score: 5, desc: "口是心非" },
-                    { text: "自己给自己过，还要发朋友圈", score: 6, desc: "独立自强" }
+                    { text: "真的假的？该不会去约会了吧？", score: 9, tag: "多疑" },
+                    { text: "好辛苦，要不要送点吃的？", score: 8, tag: "关心" },
+                    { text: "终于可以自己打游戏/追剧了！", score: 4, tag: "独立" },
+                    { text: "视频查岗！必须看到工位", score: 10, tag: "严控" }
                 ]
             },
             {
                 question: "你觉得恋爱中最重要的是？",
                 options: [
-                    { text: "感觉/心动", score: 8, desc: "感觉至上" },
-                    { text: "三观一致", score: 10, desc: "理智成熟" },
-                    { text: "经济条件", score: 6, desc: "现实派" },
-                    { text: "颜值身材", score: 5, desc: "视觉动物" }
+                    { text: "感觉/心动", score: 8, tag: "感性" },
+                    { text: "三观一致", score: 7, tag: "理性" },
+                    { text: "对方对我好", score: 6, tag: "被爱" },
+                    { text: "能一起成长", score: 5, tag: "成长" }
                 ]
             },
             {
-                question: "对方和前任还有联系，你会？",
+                question: "如果对方忘记纪念日，你会？",
                 options: [
-                    { text: "完全不能接受", score: 6, desc: "占有欲强" },
-                    { text: "正常联系可以，暧昧不行", score: 8, desc: "有原则" },
-                    { text: "不在乎，谁还没个过去", score: 7, desc: "大度型" },
-                    { text: "甚至想和Ta前任做朋友", score: 3, desc: "神奇操作" }
+                    { text: "大吵一架，觉得不被重视", score: 9, tag: "情绪化" },
+                    { text: "暗示提醒：'今天好像是个特殊日子？'", score: 6, tag: "暗示" },
+                    { text: "假装不知道，自己偷偷难过", score: 7, tag: "隐忍" },
+                    { text: "没关系，纪念日只是形式", score: 3, tag: "豁达" }
                 ]
             },
             {
-                question: "你会为了恋爱放弃什么？",
+                question: "你希望恋爱后多久见家长？",
                 options: [
-                    { text: "游戏/爱好时间", score: 8, desc: "愿意付出" },
-                    { text: "和朋友聚会", score: 6, desc: "重色轻友" },
-                    { text: "工作晋升机会", score: 4, desc: "恋爱脑" },
-                    { text: "什么都不放弃", score: 7, desc: "自我保护" }
+                    { text: "1个月内，趁热打铁", score: 10, tag: "急切" },
+                    { text: "半年以上，稳定了再说", score: 4, tag: "稳重" },
+                    { text: "1-3个月，看感情发展", score: 6, tag: "适中" },
+                    { text: "不想太早见，压力大", score: 5, tag: "逃避" }
                 ]
             },
             {
-                question: "第一次约会你会穿？",
+                question: "对方异性朋友约单独吃饭，你会？",
                 options: [
-                    { text: "精心搭配的战袍", score: 9, desc: "精致猪猪" },
-                    { text: "平时的衣服，干净就行", score: 6, desc: "自然派" },
-                    { text: "特意买的新衣服", score: 8, desc: "重视型" },
-                    { text: "睡衣拖鞋就去了", score: 2, desc: "放飞自我" }
+                    { text: "坚决不允许！要去我也去", score: 10, tag: "霸道" },
+                    { text: "可以去，但要报备全程", score: 8, tag: "监管" },
+                    { text: "相信TA，不干涉", score: 3, tag: "信任" },
+                    { text: "偷偷跟着去（开玩笑的...吧？）", score: 7, tag: "腹黑" }
                 ]
             },
             {
-                question: "你觉得「暧昧期」最长能接受多久？",
+                question: "你会因为恋爱放弃什么？",
                 options: [
-                    { text: "1个月内必须确定关系", score: 7, desc: "效率派" },
-                    { text: "3个月，慢慢了解", score: 9, desc: "谨慎型" },
-                    { text: "半年以上，享受过程", score: 5, desc: "慢热型" },
-                    { text: "一直暧昧也挺好", score: 3, desc: "不婚/恋主义" }
+                    { text: "和朋友聚会的时间", score: 7, tag: "重色轻友" },
+                    { text: "个人爱好/兴趣", score: 8, tag: "投入" },
+                    { text: "工作晋升机会", score: 10, tag: "疯狂" },
+                    { text: "基本不会放弃什么", score: 2, tag: "自我" }
                 ]
             },
             {
-                question: "对方送你9.9包邮的礼物，你会？",
+                question: "看到情侣街头秀恩爱，你的反应是？",
                 options: [
-                    { text: "礼轻情意重，开心收下", score: 10, desc: "高情商" },
-                    { text: "有点失落但不表现", score: 5, desc: "隐忍" },
-                    { text: "直接说太便宜了吧", score: 2, desc: "直爽" },
-                    { text: "怀疑对方是不是不重视我", score: 3, desc: "想太多" }
+                    { text: "好甜啊！我也要这样！", score: 8, tag: "羡慕" },
+                    { text: "切，秀恩爱死得快", score: 4, tag: "柠檬" },
+                    { text: "想起我家那位，傻笑", score: 9, tag: "甜蜜" },
+                    { text: "尴尬得脚趾扣地", score: 5, tag: "社恐" }
                 ]
             },
             {
-                question: "你的恋爱宣言是？",
+                question: "你认为恋爱中应该？",
                 options: [
-                    { text: "不以结婚为目的的恋爱都是耍流氓", score: 8, desc: "传统派" },
-                    { text: "曾经拥有就好，不求天长地久", score: 5, desc: "随性派" },
-                    { text: "只要相爱，其他都不是问题", score: 9, desc: "理想主义" },
-                    { text: "恋爱？狗都不谈！", score: 1, desc: "单身贵族" }
+                    { text: "24小时黏在一起", score: 10, tag: "黏人" },
+                    { text: "各自有空间，但要保持联系", score: 6, tag: "平衡" },
+                    { text: "各忙各的，有空再聊", score: 3, tag: "独立" },
+                    { text: "每天必须视频/语音", score: 8, tag: "依赖" }
                 ]
             },
             {
-                question: "发现对方有你不能接受的缺点，你会？",
+                question: "如果分手，你会？",
                 options: [
-                    { text: "尝试改变对方", score: 5, desc: "完美主义" },
-                    { text: "包容接受，人无完人", score: 10, desc: "包容型" },
-                    { text: "纠结要不要分手", score: 4, desc: "优柔寡断" },
-                    { text: "直接分手，下一个更乖", score: 3, desc: "果断型" }
+                    { text: "死缠烂打求复合", score: 10, tag: "执着" },
+                    { text: "拉黑删除一条龙", score: 7, tag: "决绝" },
+                    { text: "做朋友，偶尔关心", score: 5, tag: "豁达" },
+                    { text: "消失一段时间，自我疗愈", score: 6, tag: "内向" }
                 ]
             },
             {
                 question: "你觉得自己在恋爱中是？",
                 options: [
-                    { text: "付出更多的一方", score: 9, desc: "奉献型" },
-                    { text: "被宠爱的一方", score: 6, desc: "小公主/王子" },
-                    { text: "平等相处", score: 10, desc: "成熟型" },
-                    { text: "总是受伤的一方", score: 3, desc: "吸渣体质" }
+                    { text: "小公主/小皇帝，要被宠", score: 9, tag: "傲娇" },
+                    { text: "照顾对方的大姐姐/大哥哥", score: 7, tag: "付出" },
+                    { text: "平等相处的伙伴", score: 5, tag: "平等" },
+                    { text: "被照顾的小可爱", score: 8, tag: "依赖" }
                 ]
             },
             {
-                question: "最后一题！你相信一见钟情吗？",
+                question: "对方送了便宜礼物，你会？",
                 options: [
-                    { text: "相信！我就是", score: 10, desc: "浪漫主义者" },
-                    { text: "不信，日久生情才靠谱", score: 8, desc: "现实派" },
-                    { text: "看脸，长得好看就信", score: 5, desc: "诚实的颜狗" },
-                    { text: "一见钟情都是见色起意", score: 7, desc: "理性分析" }
+                    { text: "礼轻情意重，开心就好", score: 5, tag: "知足" },
+                    { text: "有点失望，但不会说", score: 6, tag: "隐忍" },
+                    { text: "直接问：'是不是不重视我？'", score: 9, tag: "敏感" },
+                    { text: "不在乎价格，喜欢就行", score: 4, tag: "随性" }
+                ]
+            },
+            {
+                question: "你会主动表白吗？",
+                options: [
+                    { text: "会！喜欢就要说出来", score: 9, tag: "勇敢" },
+                    { text: "暗示对方先开口", score: 6, tag: "含蓄" },
+                    { text: "等对方表白，女生要矜持", score: 7, tag: "传统" },
+                    { text: "如果非常喜欢会主动", score: 8, tag: "理性" }
+                ]
+            },
+            {
+                question: "恋爱中你最在意对方的？",
+                options: [
+                    { text: "颜值/身材", score: 8, tag: "颜控" },
+                    { text: "经济实力", score: 7, tag: "现实" },
+                    { text: "性格/三观", score: 6, tag: "内在" },
+                    { text: "对我好不好", score: 9, tag: "被爱" }
+                ]
+            },
+            {
+                question: "你觉得自己是？",
+                options: [
+                    { text: "恋爱脑，一谈恋爱就智商下降", score: 10, tag: "恋爱脑" },
+                    { text: "理智派，不会被爱情冲昏头", score: 3, tag: "理智" },
+                    { text: "半恋爱脑，看情况", score: 6, tag: "中间派" },
+                    { text: "嘴上说不要，身体很诚实", score: 8, tag: "口嫌体" }
+                ]
+            },
+            {
+                question: "对方不秒回消息，你会想？",
+                options: [
+                    { text: "肯定在和别人聊天！", score: 10, tag: "多疑" },
+                    { text: "可能在忙吧", score: 4, tag: "理解" },
+                    { text: "故意等很久再回，报复！", score: 7, tag: "幼稚" },
+                    { text: "直接打电话问在干嘛", score: 8, tag: "直接" }
+                ]
+            },
+            {
+                question: "最后一题！你对这段测试的感觉是？",
+                options: [
+                    { text: "太准了！这就是我！", score: 8, tag: "认同" },
+                    { text: "有点准，但不完全", score: 5, tag: "半信" },
+                    { text: "纯属娱乐，不必当真", score: 2, tag: "娱乐" },
+                    { text: "我要分享给朋友一起测！", score: 9, tag: "分享" }
                 ]
             }
         ];
 
+        // 结果类型配置
+        const resultTypes = {
+            novice: {
+                range: [0, 40],
+                title: "恋爱小白 🌱",
+                emoji: "👶",
+                description: "纯情萌新，还在恋爱门外徘徊",
+                tags: ["单纯", "懵懂", "需要指导"],
+                personality: "你就像一张白纸，对恋爱充满憧憬但缺乏经验。你可能比较害羞，不敢主动表达，容易想太多。建议：多观察、少纠结，勇敢迈出第一步！",
+                attachment: "焦虑型依恋倾向。你渴望亲密关系，但又害怕受伤，常常处于'想靠近又想逃避'的矛盾中。",
+                possessiveness: "低占有欲（20%）。你比较佛系，认为是你的跑不掉，不是你的留不住。但要注意别太被动哦！",
+                advice: "💡 建议：多参加社交活动，增加恋爱经验；学会表达自己的需求；不要因为害怕受伤就拒绝开始。"
+            },
+            learner: {
+                range: [41, 60],
+                title: "恋爱学徒 📚",
+                emoji: "🎓",
+                description: "有点经验，正在学习中",
+                tags: ["成长中", "探索者", "潜力股"],
+                personality: "你已经有了一些恋爱经验，开始懂得一些套路，但还不够成熟。你会思考、会反思，是个很有潜力的恋爱选手！",
+                attachment: "混合型依恋。你在独立和依赖之间寻找平衡，有时候会黏人，有时候又想要空间。",
+                possessiveness: "中等占有欲（50%）。你会在意对方，但不会过度控制。偶尔吃醋是情趣，别太频繁就好！",
+                advice: "💡 建议：继续保持学习的心态；建立健康的沟通模式；学会在爱别人之前先爱自己。"
+            },
+            expert: {
+                range: [61, 80],
+                title: "恋爱达人 🔥",
+                emoji: "😎",
+                description: "经验丰富，恋爱高手",
+                tags: ["自信", "魅力", "情场老手"],
+                personality: "恭喜你！你已经是恋爱界的老司机了。你懂得如何经营感情，知道什么时候该进什么时候该退，魅力值爆表！",
+                attachment: "安全型依恋。你能够建立健康、稳定的亲密关系，既不过分依赖，也不过分疏远。",
+                possessiveness: "较高占有欲（75%）。你很在意另一半，会主动维护感情，但要注意别让对方感到窒息哦！",
+                advice: "💡 建议：保持真诚，不要玩弄套路；珍惜眼前人；记得恋爱不是游戏，真心最重要。"
+            },
+            master: {
+                range: [81, 100],
+                title: "恋爱大师 👑",
+                emoji: "💯",
+                description: "登峰造极，恋爱段位MAX",
+                tags: ["情圣", "套路王", "恋爱脑"],
+                personality: "你简直是恋爱界的传说！要么是情场高手，要么是超级恋爱脑。你对爱情投入极深，但也要小心物极必反哦！",
+                attachment: "焦虑-矛盾型依恋。你对爱情极度投入，容易患得患失，需要对方不断确认爱意。",
+                possessiveness: "极高占有欲（95%）。你的眼里容不下沙子，对方的一举一动都在你的监控之下。小心把对方吓跑！",
+                advice: "💡 建议：适当给对方一些空间；学会控制自己的情绪；不要把全部精力都放在恋爱上，保持自我成长。"
+            }
+        };
+
         // ==================== 全局变量 ====================
-        let currentQuestion = 0;
+        let currentQuestionIndex = 0;
         let answers = [];
         let totalScore = 0;
+        let dimensionScores = {
+            passion: 0,      // 热情度
+            possessiveness: 0, // 占有欲
+            rationality: 0,   // 理性度
+            dependence: 0    // 依赖度
+        };
 
-        // ==================== 核心功能函数 ====================
-        
-        /**
-         * 开始测试
-         */
-        function startTest() {
-            document.getElementById('homePage').style.display = 'none';
-            document.getElementById('testPage').style.display = 'block';
-            currentQuestion = 0;
-            answers = [];
-            totalScore = 0;
-            showQuestion();
+        // ==================== 初始化 ====================
+        function init() {
+            createBackgroundHearts();
         }
 
-        /**
-         * 显示当前题目
-         */
-        function showQuestion() {
-            const question = questions[currentQuestion];
+        // 创建背景爱心装饰
+        function createBackgroundHearts() {
+            const container = document.getElementById('bgDecoration');
+            const hearts = ['❤️', '💕', '💖', '💗', '💘', '💝', '💞', '💓'];
+            
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.top = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 6 + 's';
+                heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                container.appendChild(heart);
+            }
+        }
+
+        // ==================== 页面切换 ====================
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // ==================== 测试逻辑 ====================
+        function startTest() {
+            currentQuestionIndex = 0;
+            answers = [];
+            totalScore = 0;
+            dimensionScores = { passion: 0, possessiveness: 0, rationality: 0, dependence: 0 };
+            showPage('testPage');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            const questionNumber = currentQuestionIndex + 1;
             
             // 更新进度
-            document.getElementById('questionNumber').textContent = 
-                `第 ${currentQuestion + 1} / ${questions.length} 题`;
-            document.getElementById('progressFill').style.width = 
-                `${((currentQuestion + 1) / questions.length) * 100}%`;
+            document.getElementById('currentQuestion').textContent = questionNumber;
+            document.getElementById('questionNumber').textContent = `第 ${questionNumber} 题`;
+            document.getElementById('progressFill').style.width = ((questionNumber / 25) * 100) + '%';
             
-            // 显示题目
+            // 更新题目
             document.getElementById('questionText').textContent = question.question;
             
-            // 生成选项
+            // 渲染选项
             const optionsContainer = document.getElementById('optionsContainer');
             optionsContainer.innerHTML = '';
             
             question.options.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option';
+                optionDiv.textContent = option.text;
                 optionDiv.onclick = () => selectOption(index);
                 
-                // 如果之前选过，恢复选择状态
-                if (answers[currentQuestion] === index) {
+                // 如果之前选过，恢复选择
+                if (answers[currentQuestionIndex] === index) {
                     optionDiv.classList.add('selected');
                 }
-                
-                optionDiv.innerHTML = `
-                    <div class="option-text">${option.text}</div>
-                    <div class="option-score">${option.desc} +${option.score}分</div>
-                `;
                 
                 optionsContainer.appendChild(optionDiv);
             });
             
             // 更新按钮状态
-            document.getElementById('prevBtn').disabled = currentQuestion === 0;
-            document.getElementById('nextBtn').disabled = answers[currentQuestion] === undefined;
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            document.getElementById('nextBtn').disabled = answers[currentQuestionIndex] === undefined;
             
             // 最后一题时改变按钮文字
-            if (currentQuestion === questions.length - 1) {
-                document.getElementById('nextBtn').textContent = '查看结果 🎉';
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestionIndex === 24) {
+                nextBtn.textContent = '查看结果 🎉';
             } else {
-                document.getElementById('nextBtn').textContent = '下一题 ➡';
+                nextBtn.textContent = '下一题 ➡️';
             }
         }
 
-        /**
-         * 选择选项
-         */
         function selectOption(index) {
-            answers[currentQuestion] = index;
+            answers[currentQuestionIndex] = index;
             
             // 更新UI
-            const options = document.querySelectorAll('.option');
-            options.forEach((opt, i) => {
+            document.querySelectorAll('.option').forEach((opt, i) => {
                 opt.classList.toggle('selected', i === index);
             });
             
@@ -902,224 +1007,240 @@
             document.getElementById('nextBtn').disabled = false;
         }
 
-        /**
-         * 上一题
-         */
         function prevQuestion() {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                showQuestion();
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
             }
         }
 
-        /**
-         * 下一题或查看结果
-         */
         function nextQuestion() {
-            if (currentQuestion < questions.length - 1) {
-                currentQuestion++;
-                showQuestion();
+            if (currentQuestionIndex < 24) {
+                currentQuestionIndex++;
+                loadQuestion();
             } else {
+                // 完成测试，显示结果
                 calculateResult();
+                showResult();
             }
         }
 
-        /**
-         * 计算结果
-         */
+        // ==================== 结果计算 ====================
         function calculateResult() {
-            // 计算总分
             totalScore = 0;
-            answers.forEach((answerIndex, questionIndex) => {
-                if (answerIndex !== undefined) {
-                    totalScore += questions[questionIndex].options[answerIndex].score;
+            dimensionScores = { passion: 0, possessiveness: 0, rationality: 0, dependence: 0 };
+            
+            questions.forEach((question, qIndex) => {
+                const selectedOption = question.options[answers[qIndex]];
+                totalScore += selectedOption.score;
+                
+                // 计算各维度得分
+                const tag = selectedOption.tag;
+                if (['热情', '冲动', '直接', '感性', '恋爱脑'].includes(tag)) {
+                    dimensionScores.passion += selectedOption.score;
+                }
+                if (['吃醋', '占有', '控制', '多疑', '严控'].includes(tag)) {
+                    dimensionScores.possessiveness += selectedOption.score;
+                }
+                if (['理性', '独立', '佛系', '豁达', '理智'].includes(tag)) {
+                    dimensionScores.rationality += selectedOption.score;
+                }
+                if (['依赖', '黏人', '被爱', '需要指导'].includes(tag)) {
+                    dimensionScores.dependence += selectedOption.score;
                 }
             });
             
-            // 确保所有题都答了
-            if (answers.length !== questions.length || answers.some(a => a === undefined)) {
-                alert('请完成所有题目后再查看结果哦~');
-                return;
-            }
+            // 标准化到100分制
+            const maxPossibleScore = questions.reduce((sum, q) => 
+                sum + Math.max(...q.options.map(o => o.score)), 0);
+            totalScore = Math.round((totalScore / maxPossibleScore) * 100);
             
-            // 跳转到结果页
-            showResult();
-        }
-
-        /**
-         * 显示结果
-         */
-        function showResult() {
-            document.getElementById('testPage').style.display = 'none';
-            document.getElementById('resultPage').style.display = 'block';
-            
-            // 根据分数判断结果类型
-            let resultType;
-            let icon;
-            let title;
-            let description;
-            let traits;
-            
-            if (totalScore >= 200) {
-                resultType = 'perfect';
-                icon = '🏆';
-                title = '恋爱大师';
-                description = `
-                    <h3>🎉 恭喜你！你是传说中的恋爱满段位大佬！</h3>
-                    <p><strong>专业解读：</strong>你拥有极高的情商和恋爱智慧，懂得在亲密关系中保持平衡。你既能付出真心，又不会迷失自我，是教科书级别的理想伴侣！</p>
-                    <p><strong>搞笑点评：</strong>建议出书《恋爱指南》，或者去开情感咨询室，肯定能赚翻！不过小心别太完美，给凡人留条活路吧😭</p>
-                    <p><strong>恋爱建议：</strong>保持初心，别因为太懂套路而失去真诚。记住，真心才是最强的必杀技！</p>
-                `;
-                traits = ['情商爆表', '温柔体贴', '成熟稳重', '完美伴侣', '人间理想'];
-            } else if (totalScore >= 160) {
-                resultType = 'excellent';
-                icon = '⭐';
-                title = '恋爱高手';
-                description = `
-                    <h3>🌟 太强了！你已经掌握了恋爱的核心奥义！</h3>
-                    <p><strong>专业解读：</strong>你在恋爱中表现出色，懂得沟通和包容，能够建立健康稳定的亲密关系。偶尔的小缺点反而让你更真实可爱~</p>
-                    <p><strong>搞笑点评：</strong>请把你的恋爱脑分一点给单身狗们吧！你这种段位，对方根本逃不出你的手掌心👋</p>
-                    <p><strong>恋爱建议：</strong>继续保持这份真诚和热情，但也要学会适当示弱，给对方照顾你的机会哦~</p>
-                `;
-                traits = ['温柔善良', '善解人意', '高情商', '值得依赖', '暖心小天使'];
-            } else if (totalScore >= 120) {
-                resultType = 'good';
-                icon = '💕';
-                title = '恋爱潜力股';
-                description = `
-                    <h3>💪 不错哦！你是正在成长中的恋爱小能手！</h3>
-                    <p><strong>专业解读：</strong>你有不错的恋爱基础，只需要在沟通和理解上再下点功夫。多一些耐心，少一些猜测，你会更棒！</p>
-                    <p><strong>搞笑点评：</strong>你就像还没觉醒的恋爱超能力者，只要多谈几次（划掉）多学习，就能进化成完全体！</p>
-                    <p><strong>恋爱建议：</strong>别太敏感，也别太迟钝。学会表达自己的需求，也要倾听对方的心声~</p>
-                `;
-                traits = ['真诚可靠', '正在进步', '有潜力', '值得培养', '未来可期'];
-            } else if (totalScore >= 80) {
-                resultType = 'average';
-                icon = '🤔';
-                title = '恋爱萌新';
-                description = `
-                    <h3>🌱 加油！你是可爱的恋爱新手村玩家！</h3>
-                    <p><strong>专业解读：</strong>你在恋爱中还有些迷茫和不确定，这很正常！每个人都是从不懂到懂，重要的是保持学习的心态~</p>
-                    <p><strong>搞笑点评：</strong>恭喜你获得「凭实力单身」成就！不过别担心，恋爱这种事，多摔几次就会了（不是）</p>
-                    <p><strong>恋爱建议：</strong>多观察、多沟通、少纠结。别把对方的每个小动作都过度解读，放松点！</p>
-                `;
-                traits = ['单纯可爱', '需要成长', '真诚', '有待开发', '萌新报道'];
-            } else {
-                resultType = 'beginner';
-                icon = '😵';
-                title = '恋爱绝缘体';
-                description = `
-                    <h3>😂 哈哈！你是传说中的「恋爱困难户」！</h3>
-                    <p><strong>专业解读：</strong>你可能对恋爱还没准备好，或者标准太高/太独特。这不是坏事，宁缺毋滥也是一种智慧！</p>
-                    <p><strong>搞笑点评：</strong>建议直接出家（划掉）建议先从爱自己开始！你的恋爱雷达可能还没安装，需要返厂维修🔧</p>
-                    <p><strong>恋爱建议：</strong>别急着恋爱，先学会独处和自爱。当你足够爱自己时，对的人自然会被吸引~</p>
-                `;
-                traits = ['独立自强', '宁缺毋滥', '清醒理智', '独特个性', '单身贵族'];
-            }
-            
-            // 更新结果显示
-            document.getElementById('resultIcon').textContent = icon;
-            document.getElementById('resultTitle').textContent = title;
-            document.getElementById('scoreDisplay').textContent = `${totalScore}/250`;
-            document.getElementById('resultDescription').innerHTML = description;
-            
-            // 显示特质标签
-            const traitsGrid = document.getElementById('traitsGrid');
-            traitsGrid.innerHTML = '';
-            traits.forEach(trait => {
-                const traitDiv = document.createElement('div');
-                traitDiv.className = 'trait-item';
-                traitDiv.textContent = trait;
-                traitsGrid.appendChild(traitDiv);
+            // 标准化维度得分
+            Object.keys(dimensionScores).forEach(key => {
+                dimensionScores[key] = Math.round((dimensionScores[key] / (maxPossibleScore * 0.25)) * 100);
             });
         }
 
-        /**
-         * 分享结果
-         */
-        function shareResult() {
-            const resultText = `我在恋爱体质测试中获得了${totalScore}分，被评为「${document.getElementById('resultTitle').textContent}」！快来测测你的恋爱段位吧！💕`;
-            
-            // 复制到剪贴板
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(resultText).then(() => {
-                    showShareTip();
-                }).catch(() => {
-                    fallbackCopy(resultText);
-                });
-            } else {
-                fallbackCopy(resultText);
+        function getResultType() {
+            const score = totalScore;
+            for (let key in resultTypes) {
+                const range = resultTypes[key].range;
+                if (score >= range[0] && score <= range[1]) {
+                    return resultTypes[key];
+                }
             }
+            return resultTypes.learner;
         }
 
-        /**
-         * 备用复制方法
-         */
-        function fallbackCopy(text) {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.opacity = '0';
-            document.body.appendChild(textArea);
-            textArea.select();
+        // ==================== 结果展示 ====================
+        function showResult() {
+            showPage('resultPage');
+            const resultType = getResultType();
             
-            try {
-                document.execCommand('copy');
-                showShareTip();
-            } catch (err) {
-                alert('复制失败，请手动分享~');
-            }
+            // 动画显示分数
+            animateScore(totalScore);
             
-            document.body.removeChild(textArea);
-        }
-
-        /**
-         * 显示分享提示
-         */
-        function showShareTip() {
-            const tip = document.getElementById('shareTip');
-            tip.style.display = 'block';
+            // 更新结果内容
+            document.getElementById('resultEmoji').textContent = resultType.emoji;
+            document.getElementById('resultTitle').textContent = resultType.title;
+            document.getElementById('resultSubtitle').textContent = resultType.description;
+            
+            // 显示标签
+            const tagsContainer = document.getElementById('resultTags');
+            tagsContainer.innerHTML = resultType.tags.map(tag => 
+                `<span class="tag">${tag}</span>`
+            ).join('');
+            
+            // 更新分析内容
+            document.getElementById('personalityAnalysis').textContent = resultType.personality;
+            document.getElementById('attachmentAnalysis').textContent = resultType.attachment;
+            document.getElementById('possessivenessAnalysis').textContent = resultType.possessiveness;
+            document.getElementById('professionalAdvice').textContent = resultType.advice;
+            
+            // 延迟渲染图表，确保页面已显示
             setTimeout(() => {
-                tip.style.display = 'none';
-            }, 2000);
+                renderRadarChart();
+            }, 500);
         }
 
-        /**
-         * 重新测试
-         */
-        function retryTest() {
-            document.getElementById('resultPage').style.display = 'none';
-            document.getElementById('homePage').style.display = 'flex';
-            currentQuestion = 0;
-            answers = [];
-            totalScore = 0;
+        // 分数动画
+        function animateScore(targetScore) {
+            const scoreElement = document.getElementById('scoreDisplay');
+            let currentScore = 0;
+            const increment = targetScore / 50;
+            const timer = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= targetScore) {
+                    currentScore = targetScore;
+                    clearInterval(timer);
+                }
+                scoreElement.textContent = Math.round(currentScore);
+            }, 20);
         }
 
-        // ==================== 页面加载完成后的初始化 ====================
-        window.addEventListener('load', () => {
-            // 添加一些随机的装饰元素
-            createFloatingEmojis();
-        });
+        // 渲染雷达图
+        function renderRadarChart() {
+            const chartDom = document.getElementById('radarChart');
+            const myChart = echarts.init(chartDom);
+            
+            const option = {
+                title: {
+                    text: '恋爱特质雷达图',
+                    left: 'center',
+                    textStyle: {
+                        color: '#667eea',
+                        fontSize: 18,
+                        fontWeight: 'bold'
+                    }
+                },
+                tooltip: {
+                    trigger: 'item'
+                },
+                radar: {
+                    indicator: [
+                        { name: '热情度', max: 100 },
+                        { name: '占有欲', max: 100 },
+                        { name: '理性度', max: 100 },
+                        { name: '依赖度', max: 100 }
+                    ],
+                    shape: 'circle',
+                    splitNumber: 4,
+                    axisName: {
+                        color: '#666',
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#e0e0e0'
+                        }
+                    },
+                    splitArea: {
+                        show: true,
+                        areaStyle: {
+                            color: ['rgba(102, 126, 234, 0.05)', 'rgba(102, 126, 234, 0.1)']
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#ccc'
+                        }
+                    }
+                },
+                series: [{
+                    name: '恋爱特质',
+                    type: 'radar',
+                    data: [{
+                        value: [
+                            dimensionScores.passion,
+                            dimensionScores.possessiveness,
+                            dimensionScores.rationality,
+                            dimensionScores.dependence
+                        ],
+                        name: '你的得分',
+                        areaStyle: {
+                            color: 'rgba(102, 126, 234, 0.3)'
+                        },
+                        lineStyle: {
+                            color: '#667eea',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#667eea'
+                        }
+                    }]
+                }]
+            };
+            
+            myChart.setOption(option);
+            
+            // 响应式
+            window.addEventListener('resize', () => {
+                myChart.resize();
+            });
+        }
 
-        /**
-         * 创建漂浮表情装饰
-         */
-        function createFloatingEmojis() {
-            const emojis = ['💕', '💖', '💗', '💘', '💝', '💞', '💓'];
-            for (let i = 0; i < 5; i++) {
-                const emoji = document.createElement('div');
-                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                emoji.style.position = 'fixed';
-                emoji.style.fontSize = `${20 + Math.random() * 30}px`;
-                emoji.style.opacity = '0.3';
-                emoji.style.left = `${Math.random() * 100}%`;
-                emoji.style.top = `${Math.random() * 100}%`;
-                emoji.style.pointerEvents = 'none';
-                emoji.style.animation = `float ${3 + Math.random() * 4}s ease-in-out infinite`;
-                emoji.style.animationDelay = `${Math.random() * 2}s`;
-                document.body.appendChild(emoji);
+        // ==================== 分享功能 ====================
+        function shareResult() {
+            const resultType = getResultType();
+            const shareText = `我刚测完恋爱体质测试，结果是：${resultType.title} ${resultType.emoji}\n得分：${totalScore}分\n快来测测你的恋爱段位！`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '恋爱体质测试',
+                    text: shareText,
+                    url: window.location.href
+                }).catch(err => console.log('分享失败:', err));
+            } else {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(shareText + '\n' + window.location.href).then(() => {
+                    showToast('结果已复制到剪贴板！快去分享吧~ 📋');
+                }).catch(() => {
+                    showToast('分享功能暂不支持，请手动复制链接 🙏');
+                });
             }
         }
+
+        // 重新测试
+        function retryTest() {
+            if (confirm('确定要重新测试吗？当前进度将丢失哦~')) {
+                startTest();
+            }
+        }
+
+        // 显示提示信息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // ==================== 启动应用 ====================
+        window.onload = init;
     </script>
 </body>
 </html>
