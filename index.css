@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #FF6B35;
+  --color-secondary: #2E4057;
+  --color-accent: #48BB78;
+  --color-danger: #E53E3E;
+  --color-bg: #F7FAFC;
+  --color-text: #1A202C;
+  --color-text-secondary: #718096;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+input, textarea, button {
+  font-family: inherit;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white font-bold py-3 px-6 rounded-xl transition-all duration-200;
+    @apply hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white font-bold py-3 px-6 rounded-xl transition-all duration-200;
+    @apply hover:opacity-90 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply bg-danger text-white font-bold py-3 px-6 rounded-xl transition-all duration-200;
+    @apply hover:opacity-90 active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary font-bold py-3 px-6 rounded-xl transition-all duration-200;
+    @apply hover:bg-primary hover:text-white active:scale-95;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl p-4 shadow-sm;
+  }
+
+  .input-field {
+    @apply w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base transition-all duration-200;
+    @apply focus:border-primary focus:outline-none;
+  }
+
+  .tab-bar {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around py-2 z-50;
+    @apply max-w-lg mx-auto;
+  }
+
+  .tab-item {
+    @apply flex flex-col items-center gap-1 py-2 px-4 text-gray-400 transition-colors;
+    @apply active:text-primary;
+  }
+
+  .tab-item.active {
+    @apply text-primary;
+  }
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(255, 107, 53, 0); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.bounce-in {
+  animation: bounce-in 0.4s ease-out;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.step-indicator {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300;
+}
+
+.step-indicator.pending {
+  @apply bg-gray-200 text-gray-500;
+}
+
+.step-indicator.in-progress {
+  @apply bg-primary text-white pulse-glow;
+}
+
+.step-indicator.completed {
+  @apply bg-accent text-white;
+}
+
+.step-indicator.failed {
+  @apply bg-danger text-white;
+}
